@@ -383,6 +383,16 @@ function openProjects() {
                               icon: const Icon(Icons.add),
                             )),
                         Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: IconButton(
+                              onPressed: () {
+                                webViewController?.evaluateJavascript(
+                                    source:
+                                        "document.querySelector('.mobile-search-toggle').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));");
+                              },
+                              icon: const Icon(Icons.search),
+                            )),
+                        Padding(
                           padding: const EdgeInsets.all(2.0),
                           child: IconButton(
                             onPressed: () async {
