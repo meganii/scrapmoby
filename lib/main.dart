@@ -229,6 +229,28 @@ function flutterSearch() {
   document.querySelector('input.form-control').focus();
 }
 
+function flutterAddIcon() {
+  const options = {
+    bubbles: true,
+    cancelable: true,
+    keyCode: 73,
+    ctrlKey: true,
+  };
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keydown", options));
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keyup", options)); 
+}
+
+function flutterUndo() {
+  const options = {
+    bubbles: true,
+    cancelable: true,
+    keyCode: 90,
+    ctrlKey: true,
+  };
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keydown", options));
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keyup", options)); 
+}
+
 """, injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
                   ]),
                   pullToRefreshController: pullToRefreshController,
@@ -402,10 +424,22 @@ function flutterSearch() {
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
-                                source: 'flutterCopy();');
+                                source: 'flutterUndo()');
                           },
                           icon: const Icon(
                             Icons.replay,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: IconButton(
+                          onPressed: () async {
+                            webViewController?.evaluateJavascript(
+                                source: 'flutterAddIcon()');
+                          },
+                          icon: const Icon(
+                            Icons.face,
                           ),
                         ),
                       ),
