@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future main() async {
@@ -71,6 +72,27 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     bool isKeyboardShown = 0 < MediaQuery.of(context).viewInsets.bottom;
 
+    Future<void> createNew() async {
+      var currentWebUri = await webViewController?.getUrl() as Uri;
+      if (kDebugMode) {
+        print(currentWebUri.path);
+      }
+      var projectName = currentWebUri.path.split("/")[1];
+      if (kDebugMode) {
+        print(projectName);
+      }
+      Uri uri = Uri(
+        scheme: currentWebUri.scheme,
+        host: currentWebUri.host,
+        path: "/$projectName/new",
+      );
+      if (kDebugMode) {
+        print(uri);
+      }
+      await webViewController?.loadUrl(
+          urlRequest: URLRequest(url: WebUri.uri(uri)));
+    }
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -84,6 +106,29 @@ class _MyAppState extends State<MyApp> {
         }
       },
       child: Scaffold(
+        floatingActionButton: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+            child: SpeedDial(
+              visible: !isKeyboardShown,
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              icon: Icons.add,
+              children: [
+                SpeedDialChild(
+                  child: const Icon(Icons.edit),
+                  label: 'New',
+                  onTap: createNew,
+                ),
+                SpeedDialChild(
+                  child: const Icon(Icons.search),
+                  label: 'Search',
+                  onTap: () async {
+                    webViewController?.evaluateJavascript(
+                        source: "flutterSearch()");
+                  },
+                ),
+              ],
+            )),
         body: SafeArea(
             child: Column(children: <Widget>[
           Expanded(
@@ -96,11 +141,12 @@ class _MyAppState extends State<MyApp> {
                   initialSettings: settings,
                   initialUserScripts: UnmodifiableListView<UserScript>([
                     UserScript(source: """
-globalThis.window.addEventListener('load', (_event) => {
-    const style = document.createElement('style');
-    style.innerHTML = ".app {padding-top:0px;} .quick-launch .flex-box {display: none;} .btn.project-home{ display: none; } .navbar.navbar-default { display: none;} .new-button { display: none;}";
-    document.head.appendChild(style);
-});
+// globalThis.window.addEventListener('load', (_event) => {
+//     const style = document.createElement('style');
+//     style.innerHTML = ".app {padding-top:0px;} .quick-launch .flex-box {display: none;} .btn.project-home{ display: none; } .navbar.navbar-default { display: none;} .new-button { display: none;}";
+//     style.innerHTML = ".new-button { display: none;}";
+//     document.head.appendChild(style);
+// });
 
 function flutterCopy() {
     const textInput = document.getElementById("text-input");
@@ -165,6 +211,20 @@ function downLines() {
 
 function openProjects() {
   document.querySelector('.navbar-brand').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));
+}
+
+function home() {
+  document.querySelector('.btn.project-home').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));
+}
+
+function flutterNew(){
+  console.log('flutterNew()');
+  document.querySelector('.new-button').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));
+}
+
+function flutterSearch() {
+  document.querySelector('.mobile-search-toggle').click();
+  document.querySelector('input.form-control').focus();
 }
 
 """, injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
@@ -286,7 +346,7 @@ function openProjects() {
                       Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             webViewController?.evaluateJavascript(
                                 source: 'upLines();');
                           },
@@ -298,7 +358,7 @@ function openProjects() {
                       Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             webViewController?.evaluateJavascript(
                                 source: 'downLines();');
                           },
@@ -334,88 +394,6 @@ function openProjects() {
                     ],
                   ),
                 )),
-          if (!isKeyboardShown)
-            SizedBox(
-                height: 40,
-                child: Container(
-                    color: Colors.grey,
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: IconButton(
-                            onPressed: () {
-                              webViewController?.evaluateJavascript(
-                                  source:
-                                      "document.querySelector('.navbar-brand').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));");
-                            },
-                            icon: const Icon(Icons.apps),
-                          ),
-                        ),
-                        Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: IconButton(
-                              onPressed: () async {
-                                var currentWebUri =
-                                    await webViewController?.getUrl() as Uri;
-                                if (kDebugMode) {
-                                  print(currentWebUri.path);
-                                }
-                                var projectName =
-                                    currentWebUri.path.split("/")[1];
-                                if (kDebugMode) {
-                                  print(projectName);
-                                }
-                                Uri uri = Uri(
-                                  scheme: currentWebUri.scheme,
-                                  host: currentWebUri.host,
-                                  path: "/$projectName/new",
-                                  // queryParameters: currentUrl.queryParameters,
-                                );
-                                if (kDebugMode) {
-                                  print(uri);
-                                }
-                                // await launchUrl(uri);
-                                await webViewController?.loadUrl(
-                                    urlRequest:
-                                        URLRequest(url: WebUri.uri(uri)));
-                              },
-                              icon: const Icon(Icons.add),
-                            )),
-                        Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: IconButton(
-                              onPressed: () {
-                                webViewController?.evaluateJavascript(
-                                    source:
-                                        "document.querySelector('.mobile-search-toggle').dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));");
-                              },
-                              icon: const Icon(Icons.search),
-                            )),
-                        Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: IconButton(
-                            onPressed: () async {
-                              var currentWebUri =
-                                  await webViewController?.getUrl() as Uri;
-                              var projectName =
-                                  currentWebUri.path.split("/")[1];
-                              if (kDebugMode) {
-                                print(projectName);
-                              }
-                              Uri uri = Uri(
-                                scheme: currentWebUri.scheme,
-                                host: currentWebUri.host,
-                                path: "/$projectName",
-                              );
-                              await webViewController?.loadUrl(
-                                  urlRequest: URLRequest(url: WebUri.uri(uri)));
-                            },
-                            icon: const Icon(Icons.home),
-                          ),
-                        ),
-                      ],
-                    ))),
         ])),
       ),
     );

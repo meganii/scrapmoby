@@ -38,6 +38,7 @@ dependencies:
   webview_flutter: ^4.7.0
   flutter_inappwebview: ^6.0.0
   url_launcher: ^6.2.5
+  flutter_speed_dial: ^7.0.0
 
 dev_dependencies:
   flutter_test:
