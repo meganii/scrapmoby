@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _MyAppState extends State<MyApp> {
   String url = "";
   double progress = 0;
   final urlController = TextEditingController();
+  bool visibleFloatingButton = true; // FABの表示用
 
   @override
   void initState() {
@@ -71,7 +73,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     bool isKeyboardShown = 0 < MediaQuery.of(context).viewInsets.bottom;
-
+    int scrollHeight = 0;
     Future<void> createNew() async {
       var currentWebUri = await webViewController?.getUrl() as Uri;
       if (kDebugMode) {
@@ -109,7 +111,7 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
             child: SpeedDial(
-              visible: !isKeyboardShown,
+              visible: visibleFloatingButton && !isKeyboardShown,
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
               icon: Icons.add,
@@ -249,6 +251,22 @@ function flutterSearch() {
                     return PermissionResponse(
                         resources: request.resources,
                         action: PermissionResponseAction.GRANT);
+                  },
+                  onScrollChanged: (controller, x, y) async {
+                    if (Platform.isAndroid) {
+                      if (scrollHeight < y) {
+                        // 下スクロール
+                        setState(() {
+                          visibleFloatingButton = false;
+                        });
+                      } else {
+                        // 上スクロール
+                        setState(() {
+                          visibleFloatingButton = true;
+                        });
+                      }
+                      scrollHeight = y;
+                    } else if (Platform.isIOS) {}
                   },
                   shouldOverrideUrlLoading:
                       (controller, navigationAction) async {
