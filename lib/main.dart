@@ -47,6 +47,7 @@ class _MyAppState extends State<MyApp> {
   double progress = 0;
   final urlController = TextEditingController();
   bool visibleFloatingButton = true; // FABの表示用
+  Timer? _longPressTimer;
 
   @override
   void initState() {
@@ -70,10 +71,22 @@ class _MyAppState extends State<MyApp> {
           );
   }
 
+  void _startLongPress() {
+    _longPressTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      webViewController?.evaluateJavascript(source: 'flutterBackspace()');
+    });
+  }
+
+  void _stopLongPress() {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isKeyboardShown = 0 < MediaQuery.of(context).viewInsets.bottom;
     int scrollHeight = 0;
+
     Future<void> createNew() async {
       var currentWebUri = await webViewController?.getUrl() as Uri;
       if (kDebugMode) {
@@ -251,6 +264,17 @@ function flutterUndo() {
   document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keyup", options)); 
 }
 
+function flutterBackspace() {
+  const options = {
+    bubbles: true,
+    cancelable: true,
+    keyCode: 8,
+  };
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keydown", options));
+  document.getElementById("text-input").dispatchEvent(new KeyboardEvent( "keyup", options));
+}
+
+
 """, injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
                   ]),
                   pullToRefreshController: pullToRefreshController,
@@ -360,7 +384,7 @@ function flutterUndo() {
                   child: Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () {
                             webViewController?.evaluateJavascript(
@@ -372,7 +396,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () {
                             webViewController?.evaluateJavascript(
@@ -384,7 +408,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
@@ -396,7 +420,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
@@ -408,7 +432,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
@@ -420,7 +444,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
@@ -432,7 +456,7 @@ function flutterUndo() {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: IconButton(
                           onPressed: () async {
                             webViewController?.evaluateJavascript(
@@ -440,6 +464,22 @@ function flutterUndo() {
                           },
                           icon: const Icon(
                             Icons.face,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: GestureDetector(
+                          onLongPress: _startLongPress,
+                          onLongPressEnd: (LongPressEndDetails details) {
+                            _stopLongPress();
+                          },
+                          onTap: () async {
+                            webViewController?.evaluateJavascript(
+                                source: 'flutterBackspace()');
+                          },
+                          child: const Icon(
+                            Icons.backspace,
                           ),
                         ),
                       ),
