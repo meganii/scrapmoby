@@ -40,6 +40,8 @@ class _MyAppState extends State<MyApp> {
         "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36",
     javaScriptEnabled: true,
     allowsBackForwardNavigationGestures: true,
+    verticalScrollbarThumbColor: const Color.fromRGBO(0, 0, 0, 0.5),
+    horizontalScrollbarThumbColor: const Color.fromRGBO(0, 0, 0, 0.5),
   );
 
   PullToRefreshController? pullToRefreshController;
