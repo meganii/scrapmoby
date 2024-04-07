@@ -72,7 +72,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLongPress() {
-    _longPressTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+    _longPressTimer =
+        Timer.periodic(const Duration(milliseconds: 100), (timer) {
       webViewController?.evaluateJavascript(source: 'flutterBackspace()');
     });
   }
