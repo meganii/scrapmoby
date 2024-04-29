@@ -321,6 +321,12 @@ function flutterBackspace() {
                       (controller, navigationAction) async {
                     var uri = navigationAction.request.url!;
 
+                    if (!uri.toString().startsWith('https://scrapbox.io')) {
+                      await launchUrl(uri);
+                      // WebViewControllerでは読み込まないようにする
+                      return NavigationActionPolicy.CANCEL;
+                    }
+
                     if (![
                       "http",
                       "https",
@@ -343,11 +349,19 @@ function flutterBackspace() {
                     return NavigationActionPolicy.ALLOW;
                   },
                   onLoadStop: (controller, url) async {
-                    pullToRefreshController?.endRefreshing();
-                    setState(() {
-                      this.url = url.toString();
-                      urlController.text = this.url;
-                    });
+                    if (!url.toString().startsWith('https://scrapbox.io')) {
+                      if (await canLaunchUrl(url as Uri)) {
+                        await launchUrl(url as Uri);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    } else {
+                      pullToRefreshController?.endRefreshing();
+                      setState(() {
+                        this.url = url.toString();
+                        urlController.text = this.url;
+                      });
+                    }
                   },
                   onReceivedError: (controller, request, error) {
                     pullToRefreshController?.endRefreshing();
